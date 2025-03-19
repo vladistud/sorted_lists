@@ -1,6 +1,4 @@
 #include <iostream>
-#include <cmath>
-#include <cstring>
 
 using namespace std;
 
@@ -16,9 +14,11 @@ void shellSort(int arr[], int n) {
     for (int gap = n / 2; gap > 0; gap /= 2) {
         for (int i = gap; i < n; i++) {
             int temp = arr[i];
-            int j;
-            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap)
+            int j = i;
+            while (j >= gap && arr[j - gap] > temp) {
                 arr[j] = arr[j - gap];
+                j -= gap;
+            }
             arr[j] = temp;
         }
     }
@@ -31,10 +31,14 @@ int partition(int arr[], int low, int high) {
     for (int j = low; j < high; j++) {
         if (arr[j] < pivot) {
             i++;
-            swap(arr[i], arr[j]);
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
         }
     }
-    swap(arr[i + 1], arr[high]);
+    int temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
     return i + 1;
 }
 
@@ -68,6 +72,7 @@ void merge(int arr[], int left, int mid, int right) {
         }
         k++;
     }
+
     while (i < n1) arr[k++] = L[i++];
     while (j < n2) arr[k++] = R[j++];
 }
@@ -83,7 +88,7 @@ void mergeSort(int arr[], int left, int right) {
 
 // 4. Сортировка подсчётом
 void countingSort(int arr[], int n) {
-    int max = arr[0], min = arr[0];
+    int min = arr[0], max = arr[0];
     for (int i = 1; i < n; i++) {
         if (arr[i] > max) max = arr[i];
         if (arr[i] < min) min = arr[i];
@@ -91,34 +96,31 @@ void countingSort(int arr[], int n) {
 
     int range = max - min + 1;
     int count[range], output[n];
-    memset(count, 0, sizeof(count));
 
-    for (int i = 0; i < n; i++)
-        count[arr[i] - min]++;
-
-    for (int i = 1; i < range; i++)
-        count[i] += count[i - 1];
-
+    for (int i = 0; i < range; i++) count[i] = 0;
+    for (int i = 0; i < n; i++) count[arr[i] - min]++;
+    for (int i = 1; i < range; i++) count[i] += count[i - 1];
     for (int i = n - 1; i >= 0; i--) {
         output[count[arr[i] - min] - 1] = arr[i];
         count[arr[i] - min]--;
     }
-
-    for (int i = 0; i < n; i++)
-        arr[i] = output[i];
+    for (int i = 0; i < n; i++) arr[i] = output[i];
 }
 
-// 5. Блочная (Bucket) сортировка
+// 5. Блочная сортировка
 void bucketSort(int arr[], int n) {
-    int max = arr[0], min = arr[0];
+    int min = arr[0], max = arr[0];
     for (int i = 1; i < n; i++) {
         if (arr[i] > max) max = arr[i];
         if (arr[i] < min) min = arr[i];
     }
 
-    int bucketCount = sqrt(n);
+    int bucketCount = n / 2; 
+    if (bucketCount < 1) bucketCount = 1;
     int buckets[bucketCount][n];
-    int sizes[bucketCount] = {0};
+    int sizes[bucketCount];
+
+    for (int i = 0; i < bucketCount; i++) sizes[i] = 0;
 
     float range = (float)(max - min + 1) / bucketCount;
 
@@ -128,9 +130,10 @@ void bucketSort(int arr[], int n) {
         buckets[index][sizes[index]++] = arr[i];
     }
 
-    for (int i = 0; i < bucketCount; i++)
+    for (int i = 0; i < bucketCount; i++) {
         if (sizes[i] > 1)
             shellSort(buckets[i], sizes[i]);
+    }
 
     int k = 0;
     for (int i = 0; i < bucketCount; i++)
@@ -138,17 +141,19 @@ void bucketSort(int arr[], int n) {
             arr[k++] = buckets[i][j];
 }
 
-// Основная функция для теста всех сортировок
+// Основная функция для тестирования всех сортировок
 int main() {
     int arr[] = {29, 10, 14, 37, 13, 7, 22, 17, 5, 3};
     int n = sizeof(arr) / sizeof(arr[0]);
 
     int arr1[n], arr2[n], arr3[n], arr4[n], arr5[n];
-    memcpy(arr1, arr, sizeof(arr));
-    memcpy(arr2, arr, sizeof(arr));
-    memcpy(arr3, arr, sizeof(arr));
-    memcpy(arr4, arr, sizeof(arr));
-    memcpy(arr5, arr, sizeof(arr));
+    for (int i = 0; i < n; i++) {
+        arr1[i] = arr[i];
+        arr2[i] = arr[i];
+        arr3[i] = arr[i];
+        arr4[i] = arr[i];
+        arr5[i] = arr[i];
+    }
 
     cout << "Исходный массив: ";
     printArray(arr, n);
